@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../providers/stream_provider.dart';
 import '../providers/theme_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -74,6 +75,21 @@ class _MapWidgetState extends State<MapWidget> {
                     ? _subdomains
                     : const [], // Add subdomains for dark mode
               ),
+              // Add circle layer to show drone path
+              if (location != null && themeProvider.showFlightPath)
+                CircleLayer(
+                  circles: [
+                    CircleMarker(
+                      point: LatLng(streamProvider.baseLatitude,
+                          streamProvider.baseLongitude),
+                      radius: kIsWeb ? 0.02 * 100000 : 2000,
+                      useRadiusInMeter: true,
+                      color: Colors.transparent,
+                      borderColor: Colors.red,
+                      borderStrokeWidth: 1.0,
+                    ),
+                  ],
+                ),
               if (location != null)
                 MarkerLayer(
                   markers: [

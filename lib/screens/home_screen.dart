@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../widgets/video_player_widget.dart';
 import '../widgets/map_widget.dart';
 import '../providers/stream_provider.dart';
@@ -23,6 +24,21 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Video Stream Location'),
         actions: [
+          // Flight path toggle button
+          Theme(
+            data: Theme.of(context),
+            child: IconButton(
+              icon: Icon(
+                context.watch<ThemeProvider>().showFlightPath
+                    ? Icons.route
+                    : Icons.route_outlined,
+              ),
+              tooltip: 'Toggle flight path',
+              onPressed: () {
+                context.read<ThemeProvider>().toggleFlightPath();
+              },
+            ),
+          ),
           IconButton(
             icon: Icon(
               context.watch<ThemeProvider>().isDarkMode

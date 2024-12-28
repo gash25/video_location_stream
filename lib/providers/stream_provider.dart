@@ -42,6 +42,10 @@ class StreamLocationProvider with ChangeNotifier {
   bool get isFlying => _isFlying;
   double get droneAngle => _angle - (pi / 2);
 
+  // Add getters for base coordinates
+  double get baseLatitude => _baseLatitude;
+  double get baseLongitude => _baseLongitude;
+
   void startFlying() {
     if (_streamLocation != null) {
       print("Starting flight simulation");
