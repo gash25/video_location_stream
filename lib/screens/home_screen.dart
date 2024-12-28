@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import '../widgets/video_player_widget.dart';
 import '../widgets/map_widget.dart';
 import '../providers/stream_provider.dart';
@@ -9,13 +8,15 @@ import '../providers/theme_provider.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  // List of test video streams
+  // List of test video streams - this is important
   static const List<String> videoStreams = [
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+    'https://raw.githubusercontent.com/gash25/videos/main/videos/video_h264.mp4',
+    'https://raw.githubusercontent.com/gash25/videos/main/videos/video_h265.mp4',
   ];
 
   @override
