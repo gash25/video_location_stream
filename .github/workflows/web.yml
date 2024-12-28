@@ -22,10 +22,13 @@ jobs:
         run: flutter pub get
         
       - name: Build Web
-        run: flutter build web --release --no-tree-shake-icons --base-href /video_location_stream/
+        run: |
+          flutter build web --release --no-tree-shake-icons
+          cp build/web/index.html build/web/404.html
         
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web 
+          publish_dir: ./build/web
+          force_orphan: true 
