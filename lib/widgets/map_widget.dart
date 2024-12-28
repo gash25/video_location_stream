@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../providers/stream_provider.dart';
+import '../providers/theme_provider.dart';
 
 class MapWidget extends StatefulWidget {
   const MapWidget({super.key});
@@ -14,6 +15,14 @@ class MapWidget extends StatefulWidget {
 class _MapWidgetState extends State<MapWidget> {
   late MapController _mapController;
 
+  // Update dark mode URL to use CartoDB dark matter
+  final String _darkModeUrl =
+      'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png';
+  final String _lightModeUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  // Add subdomains for CartoDB
+  final List<String> _subdomains = ['a', 'b', 'c', 'd'];
+
   @override
   void initState() {
     super.initState();
@@ -23,21 +32,20 @@ class _MapWidgetState extends State<MapWidget> {
   void _focusLocation(LatLng position) {
     // Add a small delay to ensure the map is ready
     Future.delayed(const Duration(milliseconds: 100), () {
-      _mapController.move(position, 14.0);
+      _mapController.move(position, 12.0);
       print('Focusing map on: ${position.latitude}, ${position.longitude}');
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<StreamLocationProvider>(
-      builder: (context, provider, child) {
-        final location = provider.streamLocation;
+    return Consumer2<StreamLocationProvider, ThemeProvider>(
+      builder: (context, streamProvider, themeProvider, child) {
+        final location = streamProvider.streamLocation;
         final position = location != null
             ? LatLng(location.latitude, location.longitude)
             : const LatLng(0, 0);
 
-        // Focus map whenever location changes
         _focusLocation(position);
 
         return Card(
@@ -46,18 +54,25 @@ class _MapWidgetState extends State<MapWidget> {
             mapController: _mapController,
             options: MapOptions(
               center: position,
-              zoom: 14.0,
+              zoom: 12.0,
               minZoom: 3.0,
               maxZoom: 19.0,
-              interactiveFlags: provider.isFlying
+              onMapReady: () {
+                _mapController.move(position, 12.0);
+              },
+              interactiveFlags: streamProvider.isFlying
                   ? InteractiveFlag.none
                   : InteractiveFlag.all,
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate:
+                    themeProvider.isDarkMode ? _darkModeUrl : _lightModeUrl,
                 userAgentPackageName: 'com.example.app',
                 maxZoom: 19,
+                subdomains: themeProvider.isDarkMode
+                    ? _subdomains
+                    : const [], // Add subdomains for dark mode
               ),
               if (location != null)
                 MarkerLayer(
@@ -67,7 +82,9 @@ class _MapWidgetState extends State<MapWidget> {
                       width: 100,
                       height: 100,
                       builder: (context) => Transform.rotate(
-                        angle: provider.isFlying ? provider.droneAngle : 0,
+                        angle: streamProvider.isFlying
+                            ? streamProvider.droneAngle
+                            : 0,
                         child: const DroneMarker(),
                       ),
                     ),

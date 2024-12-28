@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../widgets/video_player_widget.dart';
 import '../widgets/map_widget.dart';
 import '../providers/stream_provider.dart';
+import '../providers/theme_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -22,20 +23,14 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Video Stream Location'),
         actions: [
-          Consumer<StreamLocationProvider>(
-            builder: (context, provider, child) {
-              return IconButton(
-                icon: Icon(
-                  provider.isFlying ? Icons.pause_circle : Icons.play_circle,
-                ),
-                onPressed: () {
-                  if (provider.isFlying) {
-                    provider.stopFlying();
-                  } else {
-                    provider.startFlying();
-                  }
-                },
-              );
+          IconButton(
+            icon: Icon(
+              context.watch<ThemeProvider>().isDarkMode
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () {
+              context.read<ThemeProvider>().toggleTheme();
             },
           ),
           IconButton(

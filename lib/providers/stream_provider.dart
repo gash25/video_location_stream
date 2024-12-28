@@ -6,20 +6,21 @@ import 'dart:async';
 class StreamLocationProvider with ChangeNotifier {
   StreamLocation? _streamLocation;
   final _random = Random();
-  // For drone movement
+
+  // Movement and position properties
   double _angle = 0;
   bool _isFlying = false;
   bool _isMoving = false;
-  double _radius =
-      0.02; // Radius of approximately 2km (0.02 degrees at equator)
   double _baseLatitude = 0;
   double _baseLongitude = 0;
   Timer? _timer;
 
-  // Movement speed
-  double _movementSpeed = 0.02;
+  // Constants for movement
+  final double _radius = 0.02; // Approximately 2km radius
+  final double _circleTime = 60.0; // Time to complete circle in seconds
+  final int _updateInterval = 16; // Milliseconds between updates (60fps)
 
-  // Define major landmasses using bounding boxes (rough approximations)
+  // Define major landmasses using bounding boxes
   final List<({double minLat, double maxLat, double minLng, double maxLng})>
       landmasses = [
     // North America (USA focused)
@@ -33,19 +34,17 @@ class StreamLocationProvider with ChangeNotifier {
   ];
 
   StreamLocationProvider() {
-    // Set initial video URL and location
     updateStreamUrl(
         'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
   }
 
   StreamLocation? get streamLocation => _streamLocation;
   bool get isFlying => _isFlying;
-  double get droneAngle =>
-      _angle - (pi / 2); // Adjust angle for proper rotation
+  double get droneAngle => _angle - (pi / 2);
 
   void startFlying() {
     if (_streamLocation != null) {
-      print("Starting flight simulation"); // Debug print
+      print("Starting flight simulation");
       _isFlying = true;
       _isMoving = true;
       _baseLatitude = _streamLocation!.latitude;
@@ -54,56 +53,46 @@ class StreamLocationProvider with ChangeNotifier {
 
       _timer?.cancel();
 
-      // Use a separate timer for movement
-      _timer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      // Calculate angle increment for smooth movement
+      // 2π radians / (10 seconds * 60fps) = angle per frame
+      final anglePerFrame = (2 * pi) / ((_circleTime * 1000) / _updateInterval);
+
+      // Use a timer for smooth movement
+      _timer = Timer.periodic(Duration(milliseconds: _updateInterval), (timer) {
         if (_isMoving) {
-          _updateDronePosition();
+          _angle += anglePerFrame;
+          if (_angle > 2 * pi) {
+            _angle = 0;
+          }
+
+          final newLatitude = _baseLatitude + (_radius * sin(_angle));
+          final newLongitude = _baseLongitude + (_radius * cos(_angle));
+
+          _streamLocation = StreamLocation(
+            latitude: newLatitude,
+            longitude: newLongitude,
+            streamUrl: _streamLocation?.streamUrl,
+          );
+
+          notifyListeners();
         }
       });
     }
   }
 
   void stopFlying() {
-    print("Stopping flight simulation"); // Debug print
+    print("Stopping flight simulation");
     _isFlying = false;
     _isMoving = false;
     _timer?.cancel();
     _timer = null;
   }
 
-  void _updateDronePosition() {
-    _angle += _movementSpeed;
-    if (_angle > 2 * pi) {
-      _angle = 0;
-    }
-
-    final newLatitude = _baseLatitude + (_radius * sin(_angle));
-    final newLongitude = _baseLongitude + (_radius * cos(_angle));
-
-    print("New drone position: $newLatitude, $newLongitude"); // Debug print
-
-    _streamLocation = StreamLocation(
-      latitude: newLatitude,
-      longitude: newLongitude,
-      streamUrl: _streamLocation?.streamUrl,
-    );
-
-    notifyListeners();
-  }
-
-  void updateStreamLocation(StreamLocation location) {
-    _streamLocation = location;
-    notifyListeners();
-  }
-
   void updateStreamUrl(String url) {
-    // Stop any ongoing flight
     stopFlying();
 
-    // Generate new location
     final landmass = landmasses[_random.nextInt(landmasses.length)];
 
-    // Calculate new coordinates
     _baseLatitude = _random.nextDouble() * (landmass.maxLat - landmass.minLat) +
         landmass.minLat;
     _baseLongitude =
@@ -112,19 +101,20 @@ class StreamLocationProvider with ChangeNotifier {
 
     print('New stream location: $_baseLatitude, $_baseLongitude');
 
-    // Create new StreamLocation with both new coordinates and URL
     _streamLocation = StreamLocation(
       latitude: _baseLatitude,
       longitude: _baseLongitude,
       streamUrl: url,
     );
 
-    // Reset movement parameters
     _angle = 0;
     _isMoving = false;
     _isFlying = false;
 
     notifyListeners();
+
+    // Automatically start flying after location is set
+    startFlying();
   }
 
   @override
