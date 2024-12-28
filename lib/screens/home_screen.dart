@@ -8,15 +8,15 @@ import '../providers/theme_provider.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  // List of test video streams - this is important
+  // List of test video streams -
   static const List<String> videoStreams = [
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
-    'https://raw.githubusercontent.com/gash25/videos/main/videos/video_h264.mp4',
-    'https://raw.githubusercontent.com/gash25/videos/main/videos/video_h265.mp4',
+    'https://firebasestorage.googleapis.com/v0/b/flutter-videos-9c1b7.firebasestorage.app/o/video_h264.mp4?alt=media&token=317b6431-8677-4f6c-8ab7-6638dbbecf11',
+    'https://firebasestorage.googleapis.com/v0/b/flutter-videos-9c1b7.firebasestorage.app/o/video_h265.mp4?alt=media&token=ee7ef047-a520-4f94-95e8-cd47f30793f4',
   ];
 
   @override
@@ -77,7 +77,11 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: ElevatedButton.icon(
                     icon: const Icon(Icons.videocam),
-                    label: Text('Drone ${index + 1}'),
+                    label: Text(index == 5
+                        ? 'H264 Drone'
+                        : index == 6
+                            ? 'H265 Drone'
+                            : 'Drone ${index + 1}'),
                     onPressed: () {
                       final provider = Provider.of<StreamLocationProvider>(
                         context,

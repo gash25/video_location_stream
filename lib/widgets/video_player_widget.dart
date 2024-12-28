@@ -29,23 +29,31 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   void _initializePlayer() async {
     try {
-      if (kIsWeb) {
-        // Web-specific initialization
-        await player.open(
-          Media(widget.videoUrl),
-          play: true, // Auto-play
-        );
-        // Set initial volume to 0 (muted)
-        await player.setVolume(0);
+      await player.open(
+        Media(widget.videoUrl),
+        play: true,
+      );
 
-        // Try to unmute after a short delay
-        Future.delayed(const Duration(seconds: 1), () {
-          player.setVolume(100);
-        });
-      } else {
-        // Non-web initialization
-        await player.open(Media(widget.videoUrl));
-      }
+      // Print basic video information
+      print('Video URL: ${widget.videoUrl}');
+      print('Player state: ${player.state}');
+
+      // Listen to player state changes
+      player.stream.playing.listen((playing) {
+        print('Video is playing: $playing');
+      });
+
+      player.stream.duration.listen((duration) {
+        print('Video duration: $duration');
+      });
+
+      player.stream.width.listen((width) {
+        print('Video width: $width');
+      });
+
+      player.stream.height.listen((height) {
+        print('Video height: $height');
+      });
     } catch (e) {
       debugPrint('Error initializing player: $e');
     }
