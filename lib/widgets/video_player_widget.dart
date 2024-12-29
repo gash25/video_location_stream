@@ -29,9 +29,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   void _initializePlayer() async {
     try {
+      // Configure player with playlist mode for looping
+      await player.setPlaylistMode(PlaylistMode.loop);
+
       await player.open(
         Media(widget.videoUrl),
-        play: true,
+        play: true, // Autoplay
       );
 
       // Print basic video information
